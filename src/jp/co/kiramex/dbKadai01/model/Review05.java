@@ -1,16 +1,21 @@
 package jp.co.kiramex.dbKadai01.model;
 
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
+
 
 public class Review05 {
     public static void main(String[] args) {
         // 3. データベース接続と結果取得のための変数宣言
         Connection con = null;
-        Statement stmt = null;
+        PreparedStatement pstmt = null;
         ResultSet rs = null;
 
         try {
@@ -23,10 +28,16 @@ public class Review05 {
                     "MyOs10281109"
                     );
             // 4. DBとやりとりする窓口（Statementオブジェクト）の作成
-            stmt = con.createStatement();
-            // 5. 6. Select文の実行と結果を格納／代入
-            String sql = "SELECT name, age FROM person WHERE id =1";
-            rs = stmt.executeQuery(sql);
+            String sql = "SELECT * FROM person WHERE id = ?";
+            pstmt = con.prepareStatement(sql);
+            // 5, 6. Select文の実行と結果を格納／代入
+            System.out.print("検索キーワードを入力してください > ");
+            String input = keyIn();
+
+            // PreparedStatementオブジェクトの?に値をセット
+            int id = Integer.parseInt(input);
+            pstmt.setInt(1, id);
+            rs = pstmt.executeQuery();
             // 7. 結果を表示する
             if (rs.next()) {
                 String name = rs.getString("name");
@@ -34,7 +45,6 @@ public class Review05 {
                 System.out.println(name);
                 System.out.println(age);
             }
-
 
         } catch (ClassNotFoundException e) {
             System.err.println("JDBCドライバのロードに失敗しました。");
@@ -51,9 +61,9 @@ public class Review05 {
                     System.err.println("ResultSetを閉じるときエラーが発生しました。");
                     e.printStackTrace();
                 }
-                if(stmt != null ) {
+                if(pstmt != null ) {
                     try {
-                        stmt.close();
+                        pstmt.close();
                     } catch (SQLException e) {
                         System.err.println("Statementを閉じるときエラーが発生しました。");
                         e.printStackTrace();
@@ -70,4 +80,16 @@ public class Review05 {
             }
         }
     }
+    private static String keyIn() {
+        String line = null;
+        try {
+            BufferedReader key = new BufferedReader(new InputStreamReader(System.in));
+            line = key.readLine();
+        } catch (IOException e) {
+
+        }
+        return line;
+    }
 }
+
+
